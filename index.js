@@ -34,46 +34,60 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("simpleNode").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-   console.log('database connected');
-    await client.close();
+    const  userCollection = client.db('simpleNode').collection('users');
+    // const user = {name: 'Rakibul Islam', email: 'rakibul082@gmail.com'}
+    // const result = await userCollection.insertOne(user);
+    // console.log(result);
+
+    app.get('/users', async (req, res) =>{
+      const cursor = userCollection.find({});
+      const users = await cursor.toArray();
+      res.send(users);
+    })
+
+
+    app.post('/users', async (req, res) => {
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      console.log(result);
+      user._id = result.insertedId;
+      res.send(user);
+  })
+
+  } 
+  finally {
+      
   }
 }
-run().catch(console.dir);
+run().catch( error => console.log(error));
 
 
 
 
-app.get('/users', (req, res) =>{
-    if(req.query.name){
-        const search = req.query.name;
-        const filtered = users.filter(user => user.name.toLocaleLowerCase().indexOf(search))
-        res.req(filtered);
-    }   
+// app.get('/users', (req, res) =>{
+//     if(req.query.name){
+//         const search = req.query.name;
+//         const filtered = users.filter(user => user.name.toLocaleLowerCase().indexOf(search))
+//         res.req(filtered);
+//     }   
 
-    else {
-        res.send(users);
-    }
+//     else {
+//         res.send(users);
+//     }
    
-})
+// })
 
 
 
 
-app.post('/users', (req, res) => {
-    console.log('Post Api called');
-    const user = req.body;
-    user.id = users.length + 1;
-    users.push(user);
-    console.log(user);
-    res.send(user);
-})
+// app.post('/users', (req, res) => {
+//     console.log('Post Api called');
+//     const user = req.body;
+//     user.id = users.length + 1;
+//     users.push(user);
+//     console.log(user);
+//     res.send(user);
+// })
 
 
 app.listen(port, () => {
